@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-
+	logLib "github.com/madeindra/trainocate-library/pkg/log"
 	mathLib "github.com/madeindra/trainocate-library/pkg/math"
 )
 
@@ -46,5 +45,6 @@ func main() {
 	sum := num.Sum()
 	avg := num.Average()
 
-	fmt.Println("Sum:", sum, "Avg:", avg)
+	logLib.Print("Sum is", sum)
+	logLib.Print("Average is", avg)
 }
