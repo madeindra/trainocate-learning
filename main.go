@@ -2,12 +2,12 @@ package main
 
 import (
 	logLib "github.com/madeindra/trainocate-library/pkg/log"
-	mathLib "github.com/madeindra/trainocate-library/pkg/math"
+	mathLib "github.com/madeindra/trainocate-library/pkg/math/v2"
 )
 
 type List interface {
-	Sum() int64
-	Average() float64
+	Sum(ch chan<- int64)
+	Average(ch chan<- float64)
 	IsTooLong(list interface{}) (bool, error)
 }
 
@@ -16,12 +16,12 @@ type Numbers struct {
 	floatList []float64
 }
 
-func (n Numbers) Sum() int64 {
-	return mathLib.Sum(n.intList)
+func (n Numbers) Sum(ch chan<- int64) {
+	mathLib.Sum(n.intList, ch)
 }
 
-func (n Numbers) Average() float64 {
-	return mathLib.Average(n.floatList)
+func (n Numbers) Average(ch chan<- float64) {
+	mathLib.Average(n.floatList, ch)
 }
 
 func (n Numbers) IsTooLong(list interface{}) (bool, error) {
@@ -42,9 +42,19 @@ func main() {
 		panic("average operation not possible")
 	}
 
-	sum := num.Sum()
-	avg := num.Average()
+	sumChan := make(chan int64)
+	avgChan := make(chan float64)
 
-	logLib.Print("Sum is", sum)
-	logLib.Print("Average is", avg)
+	go num.Sum(sumChan)
+	go num.Average(avgChan)
+
+	for i := 0; i < 2; i++ {
+		select {
+		case sum := <-sumChan:
+			logLib.Print("Sum is", sum)
+		case avg := <-avgChan:
+			logLib.Print("Average is", avg)
+		}
+	}
+
 }
